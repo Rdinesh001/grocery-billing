@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bill</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#667eea">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f6f9;
+    }
+
+    .bill-container {
+      width: 70%;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-cancel {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .total {
+      text-align: right;
+      font-size: 20px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .actions {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .confirm-btn {
+      background: #667eea;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .back-btn:hover,
+    .confirm-btn:hover,
+    .btn-cancel:hover {
+      opacity: 0.9;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .bill-container {
+        width: 95%;
+        margin: 10px auto;
+        padding: 15px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      th, td {
+        padding: 6px;
+      }
+
+      .total {
+        font-size: 18px;
+      }
+
+      .confirm-btn,
+      .back-btn {
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      .top-bar {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bill-container" id="billArea">
+
+  <div class="top-bar">
+    <button class="back-btn" onclick="goBack()">⬅ Go Back</button>
+  </div>
+
+  <h2>SIVA STORE</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Amount</th>
+        <th>Cancel</th>
+      </tr>
+    </thead>
+    <tbody id="bill"></tbody>
+  </table>
+
+  <div class="total">
+    Total: ₹<span id="total">0</span>
+  </div>
+
+  <div class="actions">
+    <button class="confirm-btn" onclick="confirmBill()">Confirm Bill</button>
+  </div>
+
+</div>
+
+<script>
+let bill = JSON.parse(localStorage.getItem("bill")) || [];
+
+function renderBill() {
+  const tbody = document.getElementById("bill");
+  const totalEl = document.getElementById("total");
+
+  tbody.innerHTML = "";
+  let total = 0;
+
+  bill.forEach((p, index) => {
+    total += p.amt;
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>₹${p.amt}</td>
+        <td>
+          <button class="btn-cancel" onclick="removeItem(${index})">X</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  totalEl.innerText = total.toFixed(2);
+
+  // Save updated bill and total in localStorage
+  localStorage.setItem("bill", JSON.stringify(bill));
+  localStorage.setItem("billTotal", total.toFixed(2));
+}
+
+function removeItem(index) {
+  bill.splice(index, 1);
+  renderBill();
+}
+
+function confirmBill() {
+  if (bill.length === 0) {
+    alert("Bill is empty");
+    return;
+  }
+
+  // Redirect to customer details page
+  window.location.href = "/customer-details";
+}
+
+function goBack() {
+  window.location.href = "/home";
+}
+
+renderBill();
+</script>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/service-worker.js')
+    .then(function() {
+      console.log("Service Worker Registered");
+    });
+}
+</script>
+
+</body>
+</html>

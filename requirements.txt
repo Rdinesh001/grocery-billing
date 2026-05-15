@@ -1,0 +1,7 @@
+Flask
+pymongo
+flask-cors
+gunicorn
+dnspython
+requests
+reportlab

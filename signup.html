@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Signup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#667eea">
+  <style>
+    body {
+  margin: 0;
+  height: 100vh;
+  background: url("http://127.0.0.1:5000/static/bg2.jpg") no-repeat center center/cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial;
+}
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 350px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #ff758c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #ff5f7a; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Create Account</h2>
+  <input id="username" placeholder="Username">
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="signup()">Create Account</button>
+  <p>Already have account <a href="/">login</a></p>
+</div>
+
+<script>
+function signup() {
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  // ❌ Empty check
+  if (!username || !email || !password) {
+    alert("Please fill all fields!");
+    return;
+  }
+
+  fetch("/api/signup", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ username, email, password })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Signup Successful");
+    window.location.href = "/";
+  })
+  .catch(err => alert("Error: " + err));
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js')
+        .then(function() {
+            console.log("Service Worker Registered");
+        });
+}
+</script>
+
+
+</body>
+</html>
