@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify, session, redirect, render_template
 from pymongo import MongoClient
 from flask_cors import CORS
@@ -8,7 +9,7 @@ CORS(app)
 app.secret_key = "secretkey123"
 
 # ------------------ MongoDB ------------------
-client = MongoClient("mongodb+srv://groceryadmin:<RSPSND08>@grocery.vtdmefo.mongodb.net/?appName=grocery")
+client = MongoClient(os.environ.get("MONGODB_URI"))
 db = client["grocery"]
 
 # Collections
@@ -228,4 +229,7 @@ if __name__ == "__main__":
     #
     # After hosting:
     # https://your-domain.com/login
-    app.run(debug=True, host="0.0.0.0", port=5000)
+   app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
