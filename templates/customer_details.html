@@ -1,1 +1,117 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #667eea;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button {
+            width: 100%;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Customer Details</h2>
+
+    <input type="text" id="name" placeholder="Customer Name" required>
+    <input type="text" id="phone" placeholder="Phone Number" required>
+    <textarea id="address" placeholder="Address" required></textarea>
+
+    <button onclick="submitOrder()">Confirm Order</button>
+</div>
+
+<script>
+function submitOrder() {
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address").value.trim();
+
+    if (!name || !phone || !address) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    const bill = JSON.parse(localStorage.getItem("bill")) || [];
+    const total = localStorage.getItem("billTotal") || 0;
+
+    fetch("/api/confirm-order", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+            name: name,
+            phone: phone,
+            address: address,
+            bill: bill,
+            total: total
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message) {
+            localStorage.removeItem("bill");
+            localStorage.removeItem("billTotal");
+            window.location.href = "/success";
+        } else {
+            alert(data.error || "Order failed");
+        }
+    })
+    .catch(err => {
+        alert("Error: " + err);
+    });
+}
+</script>
+
+</body>
+</html>
