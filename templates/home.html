@@ -1,1 +1,284 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Siva Grocery Store</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#667eea">
+
+  <style>
+    body { font-family: Arial; background:#f4f6f9; }
+
+    .top {
+      text-align:center;
+      padding:20px;
+      background:#667eea;
+      color:white;
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .search-box {
+      text-align:center;
+      margin:15px;
+    }
+
+    .search-box input {
+      width:50%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:16px;
+    }
+
+    table {
+      width:95%;
+      margin:20px auto;
+      border-collapse: collapse;
+      background:white;
+    }
+
+    th, td {
+      border:1px solid #ccc;
+      padding:10px;
+      text-align:center;
+    }
+
+    th { background:#667eea; color:white; }
+
+    img {
+      width:60px;
+      height:60px;
+      object-fit:cover;
+      border-radius:8px;
+    }
+
+    .add-btn {
+      background:#28a745;
+      color:white;
+      border:none;
+      padding:6px 12px;
+      border-radius:5px;
+      cursor:pointer;
+    }
+
+    .view-bill {
+      position:fixed;
+      top:20px;
+      right:20px;
+      background:#007bff;
+      color:white;
+      padding:10px 15px;
+      border-radius:6px;
+      text-decoration:none;
+    }
+
+    .selected {
+      background:#ffe082 !important;
+      outline:2px solid #ff9800;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="top">Siva Grocery Store
+  Tiruchendur
+</div>
+<a class="view-bill" href="/bill">View Bill</a>
+
+<div class="search-box">
+  <input id="search" type="text" placeholder="Search products...">
+</div>
+
+<table id="productTable" tabindex="0">
+  <thead>
+    <tr>
+      <th>Image</th>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Qty</th>
+      <th>Amount</th>
+      <th>Add</th>
+    </tr>
+  </thead>
+  <tbody id="products"></tbody>
+</table>
+
+<script>
+let products = [];
+let filtered = [];
+let cart = [];
+
+let row = 0;
+let col = 0;
+
+// Fetch products
+fetch("/api/all-products")
+  .then(res => res.json())
+  .then(data => {
+    products = data;
+    filtered = data;
+    render(filtered);
+  });
+
+// Search
+document.getElementById("search").addEventListener("input", e => {
+  const text = e.target.value.toLowerCase();
+  filtered = products.filter(p =>
+    p.name.toLowerCase().includes(text)
+  );
+
+  row = 0;
+  col = 0;
+
+  render(filtered);
+  highlightCell();
+});
+
+// Render table
+function render(list) {
+  const tbody = document.getElementById("products");
+  tbody.innerHTML = "";
+
+  list.forEach((p, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td><img src="${p.image || 'https://via.placeholder.com/60'}"></td>
+        <td>${p.name}</td>
+        <td>₹${p.price}</td>
+        <td>
+          <input type="text" min="1" value="1"
+  onfocus="this.select()"
+  onclick="this.focus()"
+  oninput="updateAmount(${i}, this.value)"
+  onkeydown="if(event.key==='Enter') addToBill(${i})">
+
+        </td>
+        <td id="amt${i}">₹${p.price}</td>
+        <td>
+          <button class="add-btn" onclick="addToBill(${i})">Add</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// Update amount
+function updateAmount(i, qty) {
+  if (!qty) return;
+
+  let product = filtered[i];
+  let input = qty.toString().toLowerCase();
+
+  let total = 0;
+
+  if (product.collection === "dals" && input.includes("g")) {
+    let grams = parseFloat(input.replace("g", ""));
+    let kg = grams / 1000;
+    total = kg * product.price;
+  } else {
+    total = product.price * parseFloat(qty);
+  }
+
+  document.getElementById("amt" + i).innerText =
+    "₹" + total.toFixed(2);
+}
+
+// Add to bill
+function addToBill(i) {
+  const inputs = document.querySelectorAll("#products input");
+
+  let input = inputs[i].value.toString().toLowerCase();
+  let product = filtered[i];
+
+  let finalQty = 0;
+  let amt = 0;
+
+  if (product.collection === "dals" && input.includes("g")) {
+    let grams = parseFloat(input.replace("g", ""));
+    finalQty = grams / 1000;
+    amt = finalQty * product.price;
+  } else {
+    finalQty = parseFloat(input || 1);
+    amt = finalQty * product.price;
+  }
+
+  cart.push({
+    name: product.name,
+    price: product.price,
+    qty: inputs[i].value,
+    amt: amt
+  });
+
+  localStorage.setItem("bill", JSON.stringify(cart));
+  alert(product.name + " added to bill");
+}
+
+// Search → ArrowDown → Table focus
+document.getElementById("search").addEventListener("keydown", e => {
+  if (e.key === "ArrowDown") {
+    document.getElementById("productTable").focus();
+    row = 0;
+    col = 0;
+    highlightCell();
+  }
+});
+
+// Keyboard navigation
+document.addEventListener("keydown", e => {
+
+  const active = document.activeElement;
+
+  if (active.tagName === "INPUT") return;
+
+  const rows = document.querySelectorAll("#products tr").length;
+  const cols = 6;
+
+  if (e.key === "ArrowDown" && row < rows - 1) row++;
+  if (e.key === "ArrowUp" && row > 0) row--;
+  if (e.key === "ArrowRight" && col < cols - 1) col++;
+  if (e.key === "ArrowLeft" && col > 0) col--;
+
+  if (e.key === "Enter") {
+    addToBill(row);
+  }
+
+  highlightCell();
+});
+
+// Highlight selected cell
+function highlightCell() {
+  document.querySelectorAll("td").forEach(td =>
+    td.classList.remove("selected")
+  );
+
+  const table = document.getElementById("productTable");
+  const cell = table.rows[row + 1]?.cells[col];
+
+  if (cell) {
+    cell.classList.add("selected");
+
+    // ⭐ AUTO FOCUS WHEN QTY COLUMN
+    if (col === 3) {
+      const input = cell.querySelector("input");
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
+  }
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js')
+        .then(function() {
+            console.log("Service Worker Registered");
+        });
+}
+</script>
+
+</body>
+</html>
