@@ -10,13 +10,22 @@
     body { font-family: Arial; background:#f4f6f9; }
 
     .top {
-      text-align:center;
-      padding:20px;
-      background:#667eea;
-      color:white;
-      font-size:28px;
-      font-weight:bold;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 15px;
+    background: #667eea;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+}
 
     .search-box {
       text-align:center;
@@ -82,8 +91,15 @@
 
 <body>
 
-<div class="top">Siva Grocery Store
-  Tiruchendur
+<div class="top">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+
+    <div>
+        <div>Siva Grocery Store</div>
+        <div style="font-size:16px;">
+            Tiruchendur
+        </div>
+    </div>
 </div>
 <a class="view-bill" href="/bill">View Bill</a>
 
