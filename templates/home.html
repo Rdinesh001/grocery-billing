@@ -29,6 +29,46 @@
     background: white;
     display: block;
 }
+.menu-btn{
+    font-size:30px;
+    cursor:pointer;
+    padding:10px;
+    color:white;
+}
+
+.sidebar{
+    height:100%;
+    width:0;
+    position:fixed;
+    top:0;
+    left:0;
+    background:white;
+    overflow-x:hidden;
+    transition:0.3s;
+    padding-top:20px;
+    box-shadow:2px 0 10px rgba(0,0,0,0.3);
+}
+
+.sidebar h2,
+.sidebar p{
+    padding:10px 20px;
+}
+
+.close-btn{
+    font-size:30px;
+    cursor:pointer;
+    margin-left:20px;
+}
+
+.founder-img{
+    width:150px !important;
+    height:150px !important;
+    display:block;
+    margin:20px auto;
+    border:5px solid red;
+    object-fit:cover;
+    background:yellow;
+}
 
     .search-box {
       text-align:center;
@@ -103,6 +143,29 @@
             Tiruchendur
         </div>
     </div>
+</div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<div id="sidebar" class="sidebar">
+    <span class="close-btn" onclick="toggleMenu()">×</span>
+
+    <img src="/static/founder.png" class="founder-img">
+
+    <h2>Siva Store</h2>
+
+    <p><b>Founder:</b> Dinesh</p>
+
+    <p><b>Address:</b><br>
+    Siva Store,<br>
+    Tiruchendur,<br>
+    Tamil Nadu</p>
+
+    <p><b>Phone:</b> 9876543210</p>
+
+    <p>
+    Welcome to Siva Store. We provide quality grocery
+    products at affordable prices for our customers.
+    </p>
 </div>
 <a class="view-bill" href="/bill">View Bill</a>
 
@@ -295,6 +358,17 @@ if ('serviceWorker' in navigator) {
         .then(function() {
             console.log("Service Worker Registered");
         });
+}
+</script>
+<script>
+function toggleMenu(){
+    let sidebar = document.getElementById("sidebar");
+
+    if(sidebar.style.width==="300px"){
+        sidebar.style.width="0";
+    }else{
+        sidebar.style.width="300px";
+    }
 }
 </script>
 
